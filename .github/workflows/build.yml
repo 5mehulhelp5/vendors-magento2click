@@ -1,0 +1,161 @@
+name: Flutter CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Allows you to trigger the build manually from the GitHub UI
+
+jobs:
+  build_android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.2' # Or any stable version you prefer
+          channel: 'stable'
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build APK
+        run: flutter build apk --release
+
+      - name: Upload Android Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release.apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Upload APK to Loadly
+        env:
+          LOADLY_API_KEY: ${{ secrets.LOADLY_API_KEY }}
+        run: |
+          if [ -z "$LOADLY_API_KEY" ]; then
+            echo "::warning::LOADLY_API_KEY secret not set — skipping Loadly upload."
+            exit 0
+          fi
+          DESC="Android build ${{ github.run_number }} — ${{ github.ref_name }}@${GITHUB_SHA:0:7}"
+          RESPONSE=$(curl -sS -X POST https://api.loadly.io/apiv2/app/upload \
+            -F "_api_key=$LOADLY_API_KEY" \
+            -F "buildInstallType=1" \
+            -F "buildUpdateDescription=$DESC" \
+            -F "file=@build/app/outputs/flutter-apk/app-release.apk")
+          echo "Loadly response: $RESPONSE"
+          CODE=$(echo "$RESPONSE" | jq -r '.code // empty')
+          if [ "$CODE" != "0" ]; then
+            echo "::error::Loadly upload failed (code=$CODE): $(echo "$RESPONSE" | jq -r '.message // .')"
+            exit 1
+          fi
+          SHORTCUT=$(echo "$RESPONSE" | jq -r '.data.buildShortcutUrl // empty')
+          QRCODE=$(echo "$RESPONSE" | jq -r '.data.buildQRCodeURL // empty')
+          {
+            echo "### 🤖 Android uploaded to Loadly"
+            [ -n "$SHORTCUT" ] && echo "- Install: https://loadly.io/$SHORTCUT"
+            [ -n "$QRCODE" ] && echo "- ![QR]($QRCODE)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  build_ios:
+    name: Build iOS IPA (Signed)
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Apple Certificate and Provisioning Profile
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          # Create variables
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          # Decode from base64
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+          echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PP_PATH
+
+          # Create temporary keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+          # Import certificate to keychain
+          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+
+          # Apply provisioning profile
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.2'
+          channel: 'stable'
+
+      - name: Disable Swift Package Manager (experimental — use CocoaPods)
+        run: flutter config --no-enable-swift-package-manager
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build IPA
+        run: flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
+
+      - name: Rename IPA
+        run: mv build/ios/ipa/*.ipa build/ios/ipa/locafy-customerapp.ipa
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: locafy-customerapp.ipa
+          path: build/ios/ipa/locafy-customerapp.ipa
+
+      - name: Upload IPA to Loadly
+        env:
+          LOADLY_API_KEY: ${{ secrets.LOADLY_API_KEY }}
+        run: |
+          if [ -z "$LOADLY_API_KEY" ]; then
+            echo "::warning::LOADLY_API_KEY secret not set — skipping Loadly upload."
+            exit 0
+          fi
+          DESC="iOS build ${{ github.run_number }} — ${{ github.ref_name }}@${GITHUB_SHA:0:7}"
+          RESPONSE=$(curl -sS -X POST https://api.loadly.io/apiv2/app/upload \
+            -F "_api_key=$LOADLY_API_KEY" \
+            -F "buildInstallType=1" \
+            -F "buildUpdateDescription=$DESC" \
+            -F "file=@build/ios/ipa/locafy-customerapp.ipa")
+          echo "Loadly response: $RESPONSE"
+          CODE=$(echo "$RESPONSE" | jq -r '.code // empty')
+          if [ "$CODE" != "0" ]; then
+            echo "::error::Loadly upload failed (code=$CODE): $(echo "$RESPONSE" | jq -r '.message // .')"
+            exit 1
+          fi
+          SHORTCUT=$(echo "$RESPONSE" | jq -r '.data.buildShortcutUrl // empty')
+          QRCODE=$(echo "$RESPONSE" | jq -r '.data.buildQRCodeURL // empty')
+          {
+            echo "### 📱 iOS uploaded to Loadly"
+            [ -n "$SHORTCUT" ] && echo "- Install: https://loadly.io/$SHORTCUT"
+            [ -n "$QRCODE" ] && echo "- ![QR]($QRCODE)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Clean up keychain
+        if: ${{ always() }}
+        run: |
+          security delete-keychain $RUNNER_TEMP/app-signing.keychain-db

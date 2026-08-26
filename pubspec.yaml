@@ -1,0 +1,222 @@
+name: magentoegypt
+description: A new Flutter project.
+# The following line prevents the package from being accidentally published to
+# pub.dev using `flutter pub publish`. This is preferred for private packages.
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
+
+# The following defines the version and build number for your application.
+# A version number is three numbers separated by dots, like 1.2.43
+# followed by an optional build number separated by a +.
+# Both the version and the builder number may be overridden in flutter
+# build by specifying --build-name and --build-number, respectively.
+# In Android, build-name is used as versionName while build-number used as versionCode.
+# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
+# In iOS, build-name is used as CFBundleShortVersionString while build-number is used as CFBundleVersion.
+# Read more about iOS versioning at
+# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
+# In Windows, build-name is used as the major, minor, and patch parts
+# of the product and file versions while build-number is used as the build suffix.
+version: 1.0.100+101
+
+environment:
+  sdk: ">=3.0.5 <4.0.0"
+
+# Dependencies specify other packages that your package needs in order to work.
+# To automatically upgrade your package dependencies to the latest versions
+# consider running `flutter pub upgrade --major-versions`. Alternatively,
+# dependencies can be manually updated by changing the version numbers below to
+# the latest version available on pub.dev. To see which dependencies have newer
+# versions available, run `flutter pub outdated`.
+dependencies:
+  animated_text_kit:
+  async:
+  cached_network_image:
+  carousel_slider:
+  mobile_scanner: ^7.0.0-beta.3
+  cloud_firestore:
+  cupertino_icons: ^1.0.2
+  country_code_picker: ^3.3.0
+  country_pickers:
+  # Native OS share sheet (used for product/link sharing). Pinned to the
+  # version already resolved transitively to avoid changing dependency resolution.
+  share_plus: 6.3.4
+  devicelocale:
+  dotted_decoration:
+  easy_debounce:
+  firebase_auth:
+  # FIREBASE PACKAGES
+  firebase_core:
+  # PUSH NOTIFICATION
+  firebase_messaging: ^15.1.5
+  flare_flutter:
+    git:
+      url: https://github.com/inspireui/Flare-Flutter.git
+      ref: 0211568820af2ba96fedb7c51462ec5a6bf566b9
+      path: flare_flutter
+  flash:
+  flutter:
+    sdk: flutter
+  flutter_cache_manager:
+  flutter_calendar_carousel:
+#  flutter_facebook_auth: 5.0.6
+  flutter_linkify:
+  flutter_local_notifications:
+  flutter_localizations:
+    sdk: flutter
+  flutter_image_compress: ^2.4.0
+  # UI
+  flutter_spinkit:
+  flutter_staggered_grid_view:
+  flutter_svg:
+
+  ### Flutter 3 fix warning
+  flutter_swiper_null_safety:
+    git: https://github.com/inspireui/flutter_swiper_null_safety
+  flutter_zoom_drawer:
+  get_it:
+
+  google_fonts:
+  hive_flutter: ^1.1.0
+  # WEB TOOLS
+  html: ^0.15.4
+  html_unescape:
+  http:
+  image_picker: ^0.8.6+1
+  extended_image: ^10.0.1
+  wechat_assets_picker: ^10.1.2
+  photo_manager: ^3.9.0
+  photo_manager_image_provider: ^2.2.0
+
+  inspireui:
+    path: packages/inspireui/
+
+  # Base
+  intl: 0.17.0
+  intl_phone_number_input: ^0.7.4
+  intro_slider:
+  json_annotation:
+  jumping_dot: ^0.0.4
+  location:
+  # SPLASH SCREEN, ONBOARD
+  lottie:
+  #  new_version_plus:
+  path:
+  path_provider:
+  # PERMISSION
+  permission_handler:
+  pin_code_fields:
+  # STATE MANAGEMENT
+  provider:
+  pull_to_refresh:
+    git: https://github.com/inspireui/flutter_pulltorefresh
+  # qr_code_scanner: 1.0.1
+  quiver:
+  random_string:
+  rate_my_app:
+  ### Native Payment
+  responsive_builder:
+  rive: ^0.13.15
+  smooth_page_indicator:
+  sticky_headers:
+  # AUTHENTICATION
+  timeago:
+  transparent_image:
+  tuple:
+  url_launcher:
+  visibility_detector:
+  webview_flutter: ^4.7.0
+  talker_flutter: ^2.2.1
+dev_dependencies:
+  dependency_validator: ^3.2.3
+  flutter_launcher_icons: ^0.12.0
+  flutter_lints:
+  flutter_native_splash:
+
+dependency_overrides:
+  path: ^1.9.0
+  intl: ^0.19.0
+
+#  Run this script to generate the app icon: flutter pub run flutter_launcher_icons:main
+
+flutter_icons:
+  #  image_path: "assets/images/icon-128x128.png"
+  image_path_android: "assets/images/app-icon-square.png"
+  image_path_ios: "assets/images/app-icon-square.png"
+  android: true # can specify file name here e.g. "ic_launcher"
+  ios: false # keep the existing (approved) iOS icon as reference — only regenerate Android
+  # Solid background + a padded foreground so the Android adaptive mask does not
+  # clip the wordmark (previously both layers were the full-bleed logo → cropped).
+  adaptive_icon_background: "#FFFFFF" # only available for Android 8.0 devices and above
+  adaptive_icon_foreground: "assets/images/app-icon-foreground.png" # only available for Android 8.0 devices and above
+
+flutter:
+  generate: true
+  uses-material-design: true
+
+  assets:
+    - lib/config/
+    - lib/config/states/
+    - lib/config/stories/
+    - assets/icons/brands/
+    - assets/icons/credit_cards/
+    - assets/icons/tabs/
+    - assets/icons/payment/
+    - assets/icons/logins/
+    - assets/images/
+    - assets/images/country/
+    - assets/images/favicon/
+    - assets/map_styles/
+    - assets/html/
+    - assets/fonts/
+    - google_fonts/
+    - assets/aj-images/
+
+  ### Uncomment to use custom font
+  ### Uncomment to use custom font
+  fonts:
+    - family: El Messiri
+      fonts:
+        - asset: assets/fonts/ElMessiri/ElMessiri-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/ElMessiri/ElMessiri-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/ElMessiri/ElMessiri-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/ElMessiri/ElMessiri-Bold.ttf
+          weight: 700
+
+    - family: Rubic
+      fonts:
+        - asset: assets/fonts/Rubic/Rubik-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Rubic/Rubik-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Rubic/Rubik-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Rubic/Rubik-Bold.ttf
+          weight: 700
+
+    - family: Barlow
+      fonts:
+        - asset: assets/fonts/BarlowMedium.ttf
+          weight: 500
+        - asset: assets/fonts/BarlowRegular.ttf
+          weight: 400
+        - asset: assets/fonts/BarlowSemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/BarlowLight.ttf
+          weight: 300
+
+    - family: Archivo
+      fonts:
+        - asset: assets/fonts/ArchivoSemiBold.ttf
+          weight: 500
+        - asset: assets/fonts/ArchivoRomanLight.ttf
+          weight: 300
+        - asset: assets/fonts/ArchivoRomanSemiBold.ttf
+          weight: 600
+
+flutter_intl:
+  enabled: true
+  use_deferred_loading: true
+  main_locale: en

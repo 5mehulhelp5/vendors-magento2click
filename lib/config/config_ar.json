@@ -1,0 +1,175 @@
+{
+    "HorizonLayout": [
+        {
+            "layout": "logo",
+            "showMenu": true,
+            "showSearch": true
+        },
+        {
+            "layout": "bannerImage",
+            "isSlider": true,
+            "autoPlay": true,
+            "showNumber": false,
+            "design": "default",
+            "showBackGround": true,
+            "radius": 5.0,
+            "items": [
+                {
+                    "category": 22,
+                    "image": "assets/images/HomeTopBanner.png",
+                    "padding": 15.0
+                },
+                {
+                    "category": 28,
+                    "image": "assets/images/winter-products-banner.png",
+                    "padding": 15.0
+                },
+                {
+                    "category": 22,
+                    "image": "assets/images/HomeTopBanner.png",
+                    "padding": 15.0
+                },
+                {
+                    "category": 28,
+                    "image": "assets/images/winter-products-banner.png",
+                    "padding": 15.0
+                }
+            ]
+        },
+        {
+            "name": "BestSellers",
+            "image": "",
+            "layout": "twoColumn",
+            "category": 21
+        },
+        {
+            "layout": "category",
+            "type": "image",
+            "wrap": true,
+            "size": 2.0,
+            "radius": 5.0,
+            "items": [
+                {
+                    "category": 21,
+                    "image": "assets/images/HomeTopBanner.png",
+                    "showDescription": false,
+                    "colors": [
+                        "#3CC2BF",
+                        "#3CC2BF"
+                    ]
+                },
+                {
+                    "category": 4,
+                    "image": "assets/images/gutrah.png",
+                    "showDescription": false,
+                    "colors": [
+                        "#3E6AB5",
+                        "#3E6AB5"
+                    ]
+                },
+                {
+                    "category": 21,
+                    "image": "assets/images/underwear.png",
+                    "showDescription": false,
+                    "colors": [
+                        "#53A2CC",
+                        "#53A2CC"
+                    ]
+                },
+                {
+                    "category": 4,
+                    "image": "assets/images/thobe.png",
+                    "showDescription": false,
+                    "colors": [
+                        "#53688A",
+                        "#53688A"
+                    ]
+                }
+            ]
+        },
+        {
+            "layout": "bannerImage",
+            "isSlider": false,
+            "isAppBanner": true,
+            "items": [
+                {
+                    "category": 22,
+                    "image": "assets/images/winter-products-banner.png",
+                    "padding": 15.0
+                }
+            ]
+        },
+        {
+            "name": "New Products",
+            "image": "",
+            "layout": "twoColumn",
+            "category": 4
+        },
+        {
+            "layout": "bannerImage",
+            "isSlider": false,
+            "isAppBanner": true,
+            "items": [
+                {
+                    "category": 22,
+                    "image": "assets/images/category-banner-two.png",
+                    "padding": 15.0
+                }
+            ]
+        },
+        {
+            "name": "Recommended Products",
+            "image": "",
+            "layout": "twoColumn",
+            "category": 4
+        },
+        {
+            "layout": "bannerImage",
+            "isSlider": false,
+            "isAppBanner": true,
+            "items": [
+                {
+                    "category": 22,
+                    "image": "assets/images/advertizing-banner.png",
+                    "padding": 15.0
+                }
+            ]
+        }
+    ],
+    "Setting": {
+        "MainColor": "#CF2027",
+        "FontFamily": "El Messiri",
+        "ProductListLayout": "list",
+        "StickyHeader": false
+    },
+    "TabBar": [
+        {
+            "layout": "category",
+            "categoryLayout": "card",
+            "label": "الرئيسية",
+            "icon": "assets/icons/tabs/ic_home_tabbar.png"
+        },
+        {
+            "layout": "category-search",
+            "label": "بحث",
+            "icon": "assets/icons/tabs/icon-search.png"
+        },
+        {
+            "layout": "wishlist",
+            "label": "أمنياتي",
+            "icon": "assets/icons/tabs/icon-heartthin.png"
+        },
+        {
+            "layout": "profile",
+            "label": "حسابي",
+            "icon": "assets/icons/tabs/icon-user.png",
+            "showChat": true
+        }
+    ],
+    "searchSuggestion": [
+        "man",
+        "dress",
+        "Stitch",
+        "ma"
+    ]
+}

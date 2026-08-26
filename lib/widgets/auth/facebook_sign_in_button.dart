@@ -1,0 +1,34 @@
+import 'package:flutter/material.dart';
+import 'package:magentoegypt/widgets/common/flux_image.dart';
+
+const _size = 50.0;
+
+class SignInButtonFacebook extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const SignInButtonFacebook({
+    Key? key,
+    required this.onPressed,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        width: _size,
+        height: _size,
+        padding: const EdgeInsets.all(4.0),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(4),
+          color: Colors.white,
+        ),
+        child: const FluxImage(
+          imageUrl: 'assets/images/logos_facebook.png',
+          width: 35,
+          height: 35,
+        ),
+      ),
+    );
+  }
+}

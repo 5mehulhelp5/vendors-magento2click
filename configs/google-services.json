@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "692482194375",
+    "project_id": "magento-app-store",
+    "storage_bucket": "magento-app-store.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:692482194375:android:e081e5cbaffe6b5fd6f7e2",
+        "android_client_info": {
+          "package_name": "com.magentoegyptpro.ajstore"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "692482194375-eh5hns8cfbitf8tcmbfb9h9n8k5r0ph9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCSPBubPa6yEJOP_eMxUm89ME_ZIznZ6ps"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "692482194375-eh5hns8cfbitf8tcmbfb9h9n8k5r0ph9.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "692482194375-vpe9e55b7dnhdm3me5kgvdqkoj5rd9ft.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.magentoegypt.ajstore"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
