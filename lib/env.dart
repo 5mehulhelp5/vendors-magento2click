@@ -56,14 +56,18 @@ Map<String, dynamic> environment = {
     /// set kIsResizeImage to true if you have finished running Re-generate image plugin
     /// ref: https://support.inspireui.com/help-center/articles/3/8/19/app-performance
     ///
-    /// kIsResizeImage ON: the testing backend now serves -small/-medium/-large
-    /// siblings (verified 2026-07-23: a 534KB original -> 3KB/8.6KB/43KB
-    /// variants, all real). Product images request the resized sibling via
-    /// ImageTools.formatImage. Before pointing the app at a different backend
-    /// (e.g. production locafy.market), confirm it has the variants too, or
-    /// product images will 404 to a grey placeholder.
+    /// kIsResizeImage OFF for this backend, pending verification. ON makes
+    /// ImageTools.formatImage request a -small/-medium/-large sibling, which
+    /// 404s to a grey placeholder if the backend never ran the Re-generate
+    /// Images plugin; OFF requests the original, which always exists. So OFF
+    /// is the fail-safe default until vendors.magento2.click is checked, and
+    /// the sibling locafy.magento2.click backend is known to have no variants.
+    ///
+    /// To confirm and flip this on: take any product image URL under /media/
+    /// and request the same path with `-small` appended before the extension.
+    /// If it returns 200 (not 404), set this to true for smaller payloads.
     "isCaching": false,
-    "kIsResizeImage": true,
+    "kIsResizeImage": false,
 
     /// Stripe payment only: set currencyCode and smallestUnitRate.
     /// All API requests expect amounts to be provided in a currency’s smallest unit.
