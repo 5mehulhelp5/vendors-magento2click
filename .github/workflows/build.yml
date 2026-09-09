@@ -115,6 +115,38 @@ jobs:
           name: app-release.aab
           path: build/app/outputs/bundle/release/app-release.aab
 
+      # Publishing needs both halves: a bundle signed with the real upload key,
+      # and Play API credentials. Neither is needed to build, so the publish step
+      # skips cleanly when either is missing. The check lives in its own step
+      # because `secrets` cannot be read from a step-level `if`.
+      - name: Check Play publish credentials
+        env:
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          if [ -n "$PLAY_SERVICE_ACCOUNT_JSON" ] && [ -n "${ANDROID_KEYSTORE_PATH:-}" ]; then
+            echo "PLAY_PUBLISH_READY=true" >> "$GITHUB_ENV"
+          else
+            echo "PLAY_PUBLISH_READY=false" >> "$GITHUB_ENV"
+            echo "::notice::Skipping Play upload - it needs PLAY_SERVICE_ACCOUNT_JSON and a bundle signed with the upload key."
+          fi
+
+      # Uploaded as a draft: the release appears in the console but reaches no
+      # tester until someone confirms it. Change status to `completed` to have
+      # every green build go straight to the internal testers instead.
+      - name: Publish to Play internal testing
+        if: env.PLAY_PUBLISH_READY == 'true'
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: app.locafy.customer
+          releaseFiles: build/app/outputs/bundle/release/app-release.aab
+          track: internal
+          status: draft
+          releaseName: ${{ github.run_number }} - ${{ github.sha }}
+          # R8 obfuscates the release build, so Play needs this to symbolicate
+          # the crash reports it shows you.
+          mappingFile: build/app/outputs/mapping/release/mapping.txt
+
   build_ios:
     name: Build iOS IPA (Signed)
     runs-on: macos-latest
