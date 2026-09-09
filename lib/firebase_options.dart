@@ -49,12 +49,15 @@ class DefaultFirebaseOptions {
     }
   }
 
+  // Android moved to the Locafy project (locafy-7461b) with the app.locafy.customer
+  // package. iOS below still points at magento-app-store, which nobody here can
+  // reach - it needs the same treatment before an iOS release.
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCSPBubPa6yEJOP_eMxUm89ME_ZIznZ6ps',
-    appId: '1:692482194375:android:e081e5cbaffe6b5fd6f7e2',
-    messagingSenderId: '692482194375',
-    projectId: 'magento-app-store',
-    storageBucket: 'magento-app-store.appspot.com',
+    apiKey: 'AIzaSyD-OjpFwhfNLN_BuK-ST82PNfUE7WvTUnI',
+    appId: '1:569055083015:android:5b5bb77153622c178fc8a2',
+    messagingSenderId: '569055083015',
+    projectId: 'locafy-7461b',
+    storageBucket: 'locafy-7461b.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
