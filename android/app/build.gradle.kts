@@ -31,9 +31,9 @@ android {
 
 
     defaultConfig {
-        // Matches the live Play listing "Locafy Fashion Marketplace" and the
-        // namespace above. Firebase has no app.locafy client yet - see README.
-        applicationId = "app.locafy"
+        // A new Play listing, deliberately separate from the live app.locafy
+        // one. Needs its own signing key and its own Firebase client.
+        applicationId = "app.locafy.customer"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
