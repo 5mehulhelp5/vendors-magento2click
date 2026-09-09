@@ -31,8 +31,9 @@ android {
 
 
     defaultConfig {
-        // Must match a client in android/app/google-services.json (Firebase)
-        applicationId = "com.magentoegyptpro.ajstore"
+        // Matches the live Play listing "Locafy Fashion Marketplace" and the
+        // namespace above. Firebase has no app.locafy client yet - see README.
+        applicationId = "app.locafy"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
