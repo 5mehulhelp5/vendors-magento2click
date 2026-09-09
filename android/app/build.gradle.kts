@@ -50,10 +50,26 @@ android {
 
     signingConfigs {
         create("release") {
-            keyAlias = envProps.getProperty("keyAlias", "ajstore")
-            keyPassword = envProps.getProperty("keyPassword", "magentoegypt123456ajstore")
-            storePassword = envProps.getProperty("storePassword", "magentoegypt123456ajstore")
-            storeFile = rootProject.file("../configs/${envProps.getProperty("storeFile", "ajstore-keystore.jks")}")
+            // Prefer the environment, so the upload key and its passwords never have
+            // to live in the repo. configs/env.props stays as the local fallback, but
+            // it still points at the old ajstore key: Play binds an app to whichever
+            // key first signs it, so a fallback build must never be uploaded.
+            val envStore = System.getenv("ANDROID_KEYSTORE_PATH")
+            if (envStore != null) {
+                storeFile = File(envStore)
+                storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("ANDROID_KEY_ALIAS")
+                keyPassword = System.getenv("ANDROID_KEY_PASSWORD")
+            } else {
+                project.logger.warn(
+                    "WARNING: no ANDROID_KEYSTORE_PATH set - signing with the bundled " +
+                    "ajstore key from configs/env.props. Do not upload this build to Play."
+                )
+                storeFile = rootProject.file("../configs/${envProps.getProperty("storeFile", "ajstore-keystore.jks")}")
+                storePassword = envProps.getProperty("storePassword")
+                keyAlias = envProps.getProperty("keyAlias")
+                keyPassword = envProps.getProperty("keyPassword")
+            }
         }
     }
 

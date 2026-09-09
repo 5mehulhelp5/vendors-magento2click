@@ -17,6 +17,10 @@ android/gradlew.bat
 *.apk
 *.aab
 
+# Signing keys never belong in the repo
+*.jks
+*.keystore
+
 # iOS
 ios/Pods/
 ios/.symlinks/
