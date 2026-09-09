@@ -81,8 +81,14 @@ android {
 //        }
         getByName("release") {
             signingConfig = signingConfigs.getByName("release")
-            isMinifyEnabled = false
-            isShrinkResources = false
+            // The unminified build ships ~30 MB of dex to every device, which no
+            // amount of ABI splitting removes. R8 is the only lever on that.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 }
