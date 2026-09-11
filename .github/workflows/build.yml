@@ -154,6 +154,11 @@ jobs:
           # R8 obfuscates the release build, so Play needs this to symbolicate
           # the crash reports it shows you.
           mappingFile: build/app/outputs/mapping/release/mapping.txt
+          # Committing an API edit otherwise sends every change waiting in the
+          # console (listing, declarations, other tracks) to review with it,
+          # which put a withdrawn open testing release back into review.
+          # Submitting stays a deliberate click in Publishing overview.
+          changesNotSentForReview: true
 
   # iOS ships as its own App Store listing, "Locafy" (app.locafy.customer,
   # Apple ID 6811112359), signed with the locafy_customer_appstore profile.
