@@ -133,19 +133,14 @@ jobs:
       # Uploaded as a draft: the release appears in the console but reaches no
       # tester until someone confirms it. Change status to `completed` to have
       # every green build go straight to the internal testers instead.
-      # continue-on-error until play-ci-publisher is invited in Play Console:
-      # without that grant the API rejects the upload, and the AAB artifact
-      # above is still produced for a manual upload. Remove once it's granted,
-      # so a real publishing failure turns the run red again.
       - name: Publish to Play internal testing
         if: env.PLAY_PUBLISH_READY == 'true'
-        continue-on-error: true
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: app.locafy.customer
           releaseFiles: build/app/outputs/bundle/release/app-release.aab
-          track: internal
+          tracks: internal
           status: draft
           releaseName: ${{ github.run_number }} - ${{ github.sha }}
           # R8 obfuscates the release build, so Play needs this to symbolicate

@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:wechat_assets_picker/wechat_assets_picker.dart';
+import 'package:image_picker/image_picker.dart' show XFile;
 import 'package:inspireui/inspireui.dart';
 import '../../common/tools/image_tools.dart';
 import '../../models/entities/user.dart';
@@ -58,11 +58,10 @@ class UserUpdateModel extends ChangeNotifier {
   }
 
   void selectImage(BuildContext context) async {
-    List<AssetEntity>? resultList;
+    List<XFile>? resultList;
 
     try {
-      resultList =
-          (await ImagePicker.select(context, maxFiles: 1)).cast<AssetEntity>();
+      resultList = await ImagePicker.select(context, maxFiles: 1);
     } on Exception catch (e) {
       printLog(e);
     }
@@ -110,7 +109,7 @@ class UserUpdateModel extends ChangeNotifier {
             : shippingPostcode.text,
       };
 
-      if (avatar is AssetEntity) {
+      if (avatar is XFile) {
         var preparedImage = await ImageTools.compressImage(avatar);
         data['avatar'] = preparedImage.replaceAll(',', '');
       }

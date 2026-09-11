@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io' show HttpClient, SecurityContext;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:image_picker_android/image_picker_android.dart';
+import 'package:image_picker_platform_interface/image_picker_platform_interface.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -67,6 +69,14 @@ void main() {
   final talker = TalkerFlutter.init();
   printLog('[main] ===== START main.dart =======');
   WidgetsFlutterBinding.ensureInitialized();
+
+  /// Use the system photo picker rather than the ACTION_GET_CONTENT file
+  /// browser. Neither needs a media permission, but the photo picker keeps the
+  /// gallery-grid experience the old in-app picker had.
+  final imagePicker = ImagePickerPlatform.instance;
+  if (imagePicker is ImagePickerAndroid) {
+    imagePicker.useAndroidPhotoPicker = true;
+  }
 
   /// Bound the decoded-image memory cache. List/card images are no longer
   /// evicted on scroll (see ImageResize.clearMemoryCacheWhenDispose), so cap

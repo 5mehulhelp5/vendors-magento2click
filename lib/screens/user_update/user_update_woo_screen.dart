@@ -1,11 +1,11 @@
 import 'dart:async';
+import 'dart:io' show File;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
-import 'package:wechat_assets_picker/wechat_assets_picker.dart';
-import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
+import 'package:image_picker/image_picker.dart' show XFile;
 import '../../common/tools.dart';
 import '../../common/tools/flash.dart';
 import '../../generated/l10n.dart';
@@ -125,9 +125,10 @@ class _UserUpdateScreenState extends State<UserUpdateWooScreen> {
                                         sigmaX: 5,
                                         sigmaY: 5,
                                       ),
-                                      child: (model.avatar is AssetEntity)
-                                          ? AssetEntityImage(
-                                              model.avatar,
+                                      child: (model.avatar is XFile)
+                                          ? Image.file(
+                                              File(
+                                                  (model.avatar as XFile).path),
                                               height: (MediaQuery.of(context)
                                                           .size
                                                           .height *
@@ -166,11 +167,13 @@ class _UserUpdateScreenState extends State<UserUpdateWooScreen> {
                                       Icons.person,
                                       size: 120,
                                     )
-                                  : (model.avatar is AssetEntity)
+                                  : (model.avatar is XFile)
                                       ? ClipRRect(
                                           borderRadius:
                                               BorderRadius.circular(150),
-                                          child: AssetEntityImage(model.avatar,
+                                          child: Image.file(
+                                              File((model.avatar as XFile)
+                                                  .path),
                                               width: 150,
                                               height: 150,
                                               fit: BoxFit.cover),

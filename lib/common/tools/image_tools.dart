@@ -6,19 +6,16 @@ import 'dart:typed_data';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:extended_image/extended_image.dart'
     show clearDiskCachedImage, clearMemoryImageCache;
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:image_picker/image_picker.dart' show ImageSource, XFile;
+import 'package:image_picker/image_picker.dart' as ip show ImagePicker;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-import 'package:wechat_assets_picker/wechat_assets_picker.dart';
-import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
 
-import '../../generated/l10n.dart';
 import '../../services/index.dart' show ServerConfig, ConfigType;
 import '../config.dart' show kAdvanceConfig;
-import '../constants.dart' show isAndroid, kDefaultImage;
+import '../constants.dart' show kDefaultImage;
 import 'image_resize.dart' show kSize;
 
 export './image_resize.dart';
@@ -236,36 +233,16 @@ class ImageTools {
     /// Disable cause the build issue on Flutter 2.2
     /// https://github.com/OpenFlutter/flutter_image_compress/issues/180
 
-    if (image is AssetEntity && isAndroid) {
-      var file = await image.file;
-      if (file?.path != null) {
-        final compressedFile = await FlutterImageCompress.compressWithFile(
-          file!.path,
-        );
-        if (compressedFile != null) {
-          return base64Encode(compressedFile);
-        }
-      }
-    }
+    if (image is file.File) {
+      final Uint8List byteData = await image.readAsBytes();
 
-    if (image is AssetEntity || image is file.File) {
-      Uint8List? byteData;
+      final tmpFile = await writeToFile(byteData);
 
-      if (image is AssetEntity) {
-        byteData = await image.originBytes;
-      } else if (image is file.File) {
-        byteData = await image.readAsBytes();
-      }
-
-      if (byteData != null) {
-        final tmpFile = await writeToFile(byteData);
-
-        final compressedFile = await FlutterImageCompress.compressWithFile(
-          tmpFile.path,
-        );
-        if (compressedFile != null) {
-          base64 += base64Encode(compressedFile);
-        }
+      final compressedFile = await FlutterImageCompress.compressWithFile(
+        tmpFile.path,
+      );
+      if (compressedFile != null) {
+        base64 += base64Encode(compressedFile);
       }
     }
 
@@ -314,103 +291,38 @@ class ImageTools {
   }
 }
 
-/// The picker ships its own strings and defaults to Chinese, which leaked into
-/// the UI as a stray "预览" next to the Confirm button. Base each delegate on
-/// the language the app is actually in and keep Confirm on our own l10n.
-class CustomAssetPickerTextDelegate extends EnglishAssetPickerTextDelegate {
-  CustomAssetPickerTextDelegate({required this.context});
-
-  final BuildContext context;
-
-  @override
-  String get confirm => S.of(context).confirm;
-}
-
-class CustomArabicAssetPickerTextDelegate extends ArabicAssetPickerTextDelegate {
-  CustomArabicAssetPickerTextDelegate({required this.context});
-
-  final BuildContext context;
-
-  @override
-  String get confirm => S.of(context).confirm;
-}
-
-AssetPickerTextDelegate _pickerTextDelegate(BuildContext context) {
-  return Localizations.localeOf(context).languageCode == 'ar'
-      ? CustomArabicAssetPickerTextDelegate(context: context)
-      : CustomAssetPickerTextDelegate(context: context);
-}
-
+/// Picks photos through the system photo picker (see `main.dart`), which needs
+/// no storage or media permission. That lets the app drop READ_MEDIA_IMAGES /
+/// READ_MEDIA_VIDEO, which Play only allows when broad gallery access is core
+/// to the app. Results are [XFile]s, which [ImageTools.compressImage] handles.
 class ImagePicker {
-  static Future<List> select(BuildContext context, {int maxFiles = 1}) async {
-    final isGranted = await checkGrantedPermission();
-    if (!isGranted) {
-      showDialogRequestPermission(context);
-      return [];
+  static Future<List<XFile>> select(BuildContext context,
+      {int maxFiles = 1}) async {
+    final picker = ip.ImagePicker();
+    if (maxFiles <= 1) {
+      final picked = await picker.pickImage(source: ImageSource.gallery);
+      return picked == null ? [] : [picked];
     }
-    final result = await AssetPicker.pickAssets(
-      context,
-      pickerConfig: AssetPickerConfig(
-          maxAssets: maxFiles,
-          textDelegate: _pickerTextDelegate(context)),
-    );
-    return result ?? [];
+    // image_picker 0.8.x has no `limit:`, so cap the selection here.
+    final picked = await picker.pickMultiImage();
+    return picked.take(maxFiles).toList();
   }
 
-  static Future<bool> checkGrantedPermission() async {
-    final permissionState = await PhotoManager.requestPermissionExtend();
-    return permissionState.isAuth;
-  }
-
-  static Future<Uint8List?>? getByteData(dynamic image) {
-    if (image is AssetEntity) {
-      return image.originBytes;
-    }
-    return null;
-  }
+  static Future<Uint8List?>? getByteData(dynamic image) =>
+      image is XFile ? image.readAsBytes() : null;
 
   static Widget getThumbnail(dynamic image,
       {double width = 100, double height = 100}) {
-    if (image is AssetEntity) {
-      return AssetEntityImage(
-        image,
+    if (image is XFile) {
+      return Image.file(
+        file.File(image.path),
         width: width,
         height: height,
+        fit: BoxFit.cover,
       );
     }
     return const SizedBox();
   }
 
-  static bool isAsset(dynamic image) => image is AssetEntity;
-
-  static void showDialogRequestPermission(BuildContext context) {
-    showCupertinoDialog(
-      context: context,
-      builder: (ctx) {
-        return CupertinoAlertDialog(
-          title: Text(S.current.notice),
-          content: Text(S.current.pleaseAllowAccessCameraGallery),
-          actions: <Widget>[
-            CupertinoDialogAction(
-              isDefaultAction: true,
-              onPressed: () async {
-                Navigator.of(ctx).pop();
-                Future.delayed(
-                  const Duration(milliseconds: 200),
-                  PhotoManager.openSetting,
-                );
-              },
-              child: Text(S.current.ok),
-            ),
-            CupertinoDialogAction(
-              child: Text(S.current.cancel),
-              onPressed: () {
-                Navigator.of(ctx).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+  static bool isAsset(dynamic image) => image is XFile;
 }

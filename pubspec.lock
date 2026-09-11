@@ -840,7 +840,7 @@ packages:
     source: hosted
     version: "0.8.9"
   image_picker_android:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: image_picker_android
       sha256: a45bef33deb24839a51fb85a4d9e504ead2b1ad1c4779d02d09bf6a8857cdd52
@@ -880,7 +880,7 @@ packages:
     source: hosted
     version: "0.2.2"
   image_picker_platform_interface:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: image_picker_platform_interface
       sha256: "9f143b0dba3e459553209e20cc425c9801af48e6dfa4f01a0fcf927be3f41665"
@@ -1254,22 +1254,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.1"
-  photo_manager:
-    dependency: "direct main"
-    description:
-      name: photo_manager
-      sha256: fb3bc8ea653370f88742b3baa304700107c83d12748aa58b2b9f2ed3ef15e6c2
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.9.0"
-  photo_manager_image_provider:
-    dependency: "direct main"
-    description:
-      name: photo_manager_image_provider
-      sha256: b6015b67b32f345f57cf32c126f871bced2501236c405aafaefa885f7c821e4f
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.2.0"
   pin_code_fields:
     dependency: "direct main"
     description:
@@ -1780,46 +1764,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.0"
-  video_player:
-    dependency: transitive
-    description:
-      name: video_player
-      sha256: "0d55b1f1a31e5ad4c4967bfaa8ade0240b07d20ee4af1dfef5f531056512961a"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.10.0"
-  video_player_android:
-    dependency: transitive
-    description:
-      name: video_player_android
-      sha256: "6cfe0b1e102522eda1e139b82bf00602181c5844fd2885340f595fb213d74842"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.8.14"
-  video_player_avfoundation:
-    dependency: transitive
-    description:
-      name: video_player_avfoundation
-      sha256: f9a780aac57802b2892f93787e5ea53b5f43cc57dc107bee9436458365be71cd
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.8.4"
-  video_player_platform_interface:
-    dependency: transitive
-    description:
-      name: video_player_platform_interface
-      sha256: cf2a1d29a284db648fd66cbd18aacc157f9862d77d2cc790f6f9678a46c1db5a
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.4.0"
-  video_player_web:
-    dependency: transitive
-    description:
-      name: video_player_web
-      sha256: "9f3c00be2ef9b76a95d94ac5119fb843dca6f2c69e6c9968f6f2b6c9e7afbdeb"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.4.0"
   visibility_detector:
     dependency: "direct main"
     description:
@@ -1876,22 +1820,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.23.1"
-  wechat_assets_picker:
-    dependency: "direct main"
-    description:
-      name: wechat_assets_picker
-      sha256: e2e447c12a6254e523b83415deb0b77953a96eafcb4586901b7d93039d2ca9d6
-      url: "https://pub.dev"
-    source: hosted
-    version: "10.1.2"
-  wechat_picker_library:
-    dependency: transitive
-    description:
-      name: wechat_picker_library
-      sha256: "5cb61b9aa935b60da5b043f8446fbb9c5077419f20ccc4856bf444aec4f44bc1"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.7"
   win32:
     dependency: transitive
     description:
