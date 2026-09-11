@@ -66,8 +66,16 @@ jobs:
             echo "ANDROID_KEY_PASSWORD=$KEY_PASSWORD"
           } >> "$GITHUB_ENV"
 
+      # Play refuses a version code it has already seen, and the pubspec's +N only
+      # moved when someone remembered to bump it, so every other push died at
+      # the Play upload. Derive it from the run number instead. The +100 lifts it
+      # past 105, the last code taken from the pubspec, since Play also refuses
+      # anything lower than a code it already has.
+      - name: Set Android version code
+        run: echo "ANDROID_VERSION_CODE=$(( ${{ github.run_number }} + 100 ))" >> "$GITHUB_ENV"
+
       - name: Build APK
-        run: flutter build apk --release
+        run: flutter build apk --release --build-number=$ANDROID_VERSION_CODE
 
       - name: Upload Android Artifact
         uses: actions/upload-artifact@v4
@@ -107,7 +115,7 @@ jobs:
       # side-loading. Built last so that if the runner runs out of disk here, the
       # APK that already reached Loadly is unaffected.
       - name: Build App Bundle (Google Play)
-        run: flutter build appbundle --release
+        run: flutter build appbundle --release --build-number=$ANDROID_VERSION_CODE
 
       - name: Upload Android App Bundle
         uses: actions/upload-artifact@v4
