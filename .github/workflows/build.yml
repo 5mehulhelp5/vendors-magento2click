@@ -196,6 +196,9 @@ jobs:
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
           # Throwaway keychain, so its password only needs to live for this job.
           KEYCHAIN_PASSWORD=$(openssl rand -base64 24)
+          # A secret saved from a Windows file can carry a CR/LF that isn't part
+          # of the password, and security then reports it as wrong.
+          P12_PASSWORD=$(printf '%s' "$IOS_DIST_CERT_P12_PASSWORD" | tr -d '\r\n')
 
           printf '%s' "$IOS_DIST_CERT_P12_BASE64" | base64 --decode -o "$CERTIFICATE_PATH"
           printf '%s' "$IOS_APPSTORE_PROFILE_BASE64" | base64 --decode -o "$PP_PATH"
@@ -203,7 +206,7 @@ jobs:
           security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security import "$CERTIFICATE_PATH" -P "$IOS_DIST_CERT_P12_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security import "$CERTIFICATE_PATH" -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
           security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security list-keychains -d user -s "$KEYCHAIN_PATH" $(security list-keychains -d user | tr -d '"')
 

@@ -162,7 +162,7 @@ Map<String, dynamic> environment = {
 
     /// If page id null
     /// Privacy Policies page Url. Accessible in the app via Settings > Privacy menu.
-    "PrivacyPoliciesPageUrl": "https://locafy.market/eg/privacy-policy",
+    "PrivacyPoliciesPageUrl": "https://vendors.magento2.click/eg-en/privacy-policy-en",
 
     "SupportPageUrl": "https://support.inspireui.com/",
 
@@ -223,7 +223,7 @@ Map<String, dynamic> environment = {
   //  "order",
     "point",
     "rating",
-    // "privacy",
+    "privacy",
     // "about"
   ],
   "loginSetting": {
