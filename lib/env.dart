@@ -32,7 +32,7 @@ Map<String, dynamic> environment = {
   "storeIdentifier": {
     "disable": true,
     "android": "app.locafy.customer",
-    "ios": "1469772800"
+    "ios": "6811112359"
   },
   "advanceConfig": {
     //This code sets the default language to Arabic.
@@ -334,9 +334,9 @@ Map<String, dynamic> environment = {
     "androidPackageName": "app.locafy.customer",
     "androidAppMinimumVersion": 1,
     //----------* iOS Setting *----------//
-    "iOSBundleId": "com.magentoegypt.ajstore",
+    "iOSBundleId": "app.locafy.customer",
     "iOSAppMinimumVersion": "1.0.1",
-    "iOSAppStoreId": "1469772800"
+    "iOSAppStoreId": "6811112359"
   },
 
   /// ➡️ lib/common/languages.dart

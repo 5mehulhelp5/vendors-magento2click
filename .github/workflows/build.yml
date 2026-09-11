@@ -147,42 +147,73 @@ jobs:
           # the crash reports it shows you.
           mappingFile: build/app/outputs/mapping/release/mapping.txt
 
+  # iOS ships as its own App Store listing, "Locafy" (app.locafy.customer,
+  # Apple ID 6811112359), signed with the locafy_customer_appstore profile.
+  # App Store-signed builds can't be side-loaded, so testers get them from
+  # TestFlight rather than Loadly.
   build_ios:
-    name: Build iOS IPA (Signed)
+    name: Build iOS IPA and upload to TestFlight
     runs-on: macos-latest
+    env:
+      # The "Locafy" team key in App Store Connect > Users and Access > Integrations.
+      # Identifiers, not secrets; the .p8 itself comes from APPSTORE_API_PRIVATE_KEY.
+      APPSTORE_API_KEY_ID: 3Q2ALL4684
+      APPSTORE_API_ISSUER_ID: 3cdd5691-e172-44c5-b932-4cec6f4773f6
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install Apple Certificate and Provisioning Profile
+      # Same shape as the Play check above: without signing material the job
+      # still proves the app compiles, it just can't produce an uploadable IPA.
+      - name: Check iOS signing credentials
         env:
-          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
-          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
-          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
-          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+          IOS_DIST_CERT_P12_BASE64: ${{ secrets.IOS_DIST_CERT_P12_BASE64 }}
+          IOS_APPSTORE_PROFILE_BASE64: ${{ secrets.IOS_APPSTORE_PROFILE_BASE64 }}
+          APPSTORE_API_PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
         run: |
-          # Create variables
-          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+          if [ -n "$IOS_DIST_CERT_P12_BASE64" ] && [ -n "$IOS_APPSTORE_PROFILE_BASE64" ]; then
+            echo "IOS_SIGNING_READY=true" >> "$GITHUB_ENV"
+          else
+            echo "IOS_SIGNING_READY=false" >> "$GITHUB_ENV"
+            echo "::warning::IOS_DIST_CERT_P12_BASE64 / IOS_APPSTORE_PROFILE_BASE64 not set - building unsigned, nothing will be uploaded."
+          fi
+          if [ -n "$APPSTORE_API_PRIVATE_KEY" ]; then
+            echo "TESTFLIGHT_READY=true" >> "$GITHUB_ENV"
+          else
+            echo "TESTFLIGHT_READY=false" >> "$GITHUB_ENV"
+            echo "::notice::APPSTORE_API_PRIVATE_KEY not set - skipping the TestFlight upload."
+          fi
+
+      - name: Install Apple certificate and provisioning profile
+        if: env.IOS_SIGNING_READY == 'true'
+        env:
+          IOS_DIST_CERT_P12_BASE64: ${{ secrets.IOS_DIST_CERT_P12_BASE64 }}
+          IOS_DIST_CERT_P12_PASSWORD: ${{ secrets.IOS_DIST_CERT_P12_PASSWORD }}
+          IOS_APPSTORE_PROFILE_BASE64: ${{ secrets.IOS_APPSTORE_PROFILE_BASE64 }}
+        run: |
+          CERTIFICATE_PATH=$RUNNER_TEMP/dist.p12
+          PP_PATH=$RUNNER_TEMP/appstore.mobileprovision
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          # Throwaway keychain, so its password only needs to live for this job.
+          KEYCHAIN_PASSWORD=$(openssl rand -base64 24)
 
-          # Decode from base64
-          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
-          echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PP_PATH
+          printf '%s' "$IOS_DIST_CERT_P12_BASE64" | base64 --decode -o "$CERTIFICATE_PATH"
+          printf '%s' "$IOS_APPSTORE_PROFILE_BASE64" | base64 --decode -o "$PP_PATH"
 
-          # Create temporary keychain
-          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$CERTIFICATE_PATH" -P "$IOS_DIST_CERT_P12_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychains -d user -s "$KEYCHAIN_PATH" $(security list-keychains -d user | tr -d '"')
 
-          # Import certificate to keychain
-          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          security list-keychain -d user -s $KEYCHAIN_PATH
-
-          # Apply provisioning profile
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+          # Xcode 16+ reads profiles from UserData; older Xcodes from MobileDevice.
+          UUID=$(security cms -D -i "$PP_PATH" | plutil -extract UUID raw -)
+          for DIR in "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles" \
+                     "$HOME/Library/MobileDevice/Provisioning Profiles"; do
+            mkdir -p "$DIR"
+            cp "$PP_PATH" "$DIR/$UUID.mobileprovision"
+          done
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -196,47 +227,47 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
+      # App Store Connect rejects a second upload with the same build number, so
+      # iOS takes the run number instead of the pubspec's +N (which Play owns).
       - name: Build IPA
-        run: flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
+        if: env.IOS_SIGNING_READY == 'true'
+        run: |
+          flutter build ipa --release \
+            --build-number=${{ github.run_number }} \
+            --export-options-plist=ios/ExportOptions.plist
+          mv build/ios/ipa/*.ipa build/ios/ipa/locafy-customer.ipa
 
-      - name: Rename IPA
-        run: mv build/ios/ipa/*.ipa build/ios/ipa/locafy-customerapp.ipa
+      - name: Build iOS (unsigned, compile check only)
+        if: env.IOS_SIGNING_READY != 'true'
+        run: flutter build ios --release --no-codesign
 
       - name: Upload IPA Artifact
+        if: env.IOS_SIGNING_READY == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: locafy-customerapp.ipa
-          path: build/ios/ipa/locafy-customerapp.ipa
+          name: locafy-customer.ipa
+          path: build/ios/ipa/locafy-customer.ipa
 
-      - name: Upload IPA to Loadly
+      - name: Upload to TestFlight
+        if: env.IOS_SIGNING_READY == 'true' && env.TESTFLIGHT_READY == 'true'
         env:
-          LOADLY_API_KEY: ${{ secrets.LOADLY_API_KEY }}
+          APPSTORE_API_PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
         run: |
-          if [ -z "$LOADLY_API_KEY" ]; then
-            echo "::warning::LOADLY_API_KEY secret not set — skipping Loadly upload."
-            exit 0
-          fi
-          DESC="iOS build ${{ github.run_number }} — ${{ github.ref_name }}@${GITHUB_SHA:0:7}"
-          RESPONSE=$(curl -sS -X POST https://api.loadly.io/apiv2/app/upload \
-            -F "_api_key=$LOADLY_API_KEY" \
-            -F "buildInstallType=1" \
-            -F "buildUpdateDescription=$DESC" \
-            -F "file=@build/ios/ipa/locafy-customerapp.ipa")
-          echo "Loadly response: $RESPONSE"
-          CODE=$(echo "$RESPONSE" | jq -r '.code // empty')
-          if [ "$CODE" != "0" ]; then
-            echo "::error::Loadly upload failed (code=$CODE): $(echo "$RESPONSE" | jq -r '.message // .')"
-            exit 1
-          fi
-          SHORTCUT=$(echo "$RESPONSE" | jq -r '.data.buildShortcutUrl // empty')
-          QRCODE=$(echo "$RESPONSE" | jq -r '.data.buildQRCodeURL // empty')
+          # altool looks the key up by id in this directory.
+          mkdir -p ~/.appstoreconnect/private_keys
+          printf '%s\n' "$APPSTORE_API_PRIVATE_KEY" > ~/.appstoreconnect/private_keys/AuthKey_${APPSTORE_API_KEY_ID}.p8
+          xcrun altool --upload-app --type ios \
+            --file build/ios/ipa/locafy-customer.ipa \
+            --apiKey "$APPSTORE_API_KEY_ID" \
+            --apiIssuer "$APPSTORE_API_ISSUER_ID"
           {
-            echo "### 📱 iOS uploaded to Loadly"
-            [ -n "$SHORTCUT" ] && echo "- Install: https://loadly.io/$SHORTCUT"
-            [ -n "$QRCODE" ] && echo "- ![QR]($QRCODE)"
+            echo "### 📱 iOS build ${{ github.run_number }} uploaded to App Store Connect"
+            echo "- It appears in TestFlight once Apple finishes processing (usually 5-30 min):"
+            echo "  https://appstoreconnect.apple.com/apps/6811112359/testflight/ios"
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Clean up keychain
+      - name: Clean up signing material
         if: ${{ always() }}
         run: |
-          security delete-keychain $RUNNER_TEMP/app-signing.keychain-db
+          security delete-keychain "$RUNNER_TEMP/app-signing.keychain-db" 2>/dev/null || true
+          rm -rf ~/.appstoreconnect/private_keys
