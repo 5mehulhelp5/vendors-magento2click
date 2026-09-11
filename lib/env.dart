@@ -162,7 +162,7 @@ Map<String, dynamic> environment = {
 
     /// If page id null
     /// Privacy Policies page Url. Accessible in the app via Settings > Privacy menu.
-    "PrivacyPoliciesPageUrl": "https://policies.google.com/",
+    "PrivacyPoliciesPageUrl": "https://locafy.market/eg/privacy-policy",
 
     "SupportPageUrl": "https://support.inspireui.com/",
 
