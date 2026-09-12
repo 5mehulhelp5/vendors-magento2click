@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:rive/rive.dart';
 
@@ -43,9 +42,10 @@ class _VendorInformationState extends State<VendorInformation> {
   var _prevSlide = 1;
 
   final _rivePath = 'assets/images/loading_widget.rive';
-  Artboard _artboard = Artboard();
-  var _rFile;
-  RiveAnimationController? _riveController;
+  File? _riveFile;
+  Artboard? _artboard;
+  _CompletionAwarePainter? _painter;
+  var _finished = false;
 
   List<Widget>? _listPages;
 
@@ -71,10 +71,15 @@ class _VendorInformationState extends State<VendorInformation> {
   }
 
   void _onFinished() {
+    // Both the tick animation and its fallback timer land here.
+    if (_finished) {
+      return;
+    }
+    _finished = true;
+
     final model = Provider.of<VendorOnBoardingModel>(context, listen: false);
     Future.delayed(const Duration(seconds: 2)).then((value) {
       model.onFinish();
-      _artboard.removeController(_riveController!);
       Future.delayed(const Duration(seconds: 1)).then((value) {
         if (mounted) {
           Navigator.of(context).pop();
@@ -85,25 +90,47 @@ class _VendorInformationState extends State<VendorInformation> {
   }
 
   void _loadRiveFile() async {
-    final bytes = await rootBundle.load(_rivePath);
-    _rFile = RiveFile.import(bytes);
+    _riveFile = await File.asset(_rivePath, riveFactory: Factory.flutter);
   }
 
   void _onStartUpdating() {
-    _riveController?.dispose();
-    _artboard = _rFile.mainArtboard
-      ..addController(_riveController = SimpleAnimation('light'));
+    _play('light');
   }
 
   void _onEndUpdating(VoidCallback onFinish) {
-    if (_riveController != null) {
-      _artboard.removeController(_riveController!);
+    _play('light_tick', onCompleted: onFinish);
+
+    // The tick reports its own end while advancing. Should the file ever stop
+    // doing so, the overlay would sit on screen for good, so also finish on a
+    // timer.
+    Future.delayed(const Duration(seconds: 3), onFinish);
+  }
+
+  /// Each painter binds to one artboard, and the spinner and the tick are
+  /// separate animations, so swap both when the animation changes.
+  void _play(String animationName, {VoidCallback? onCompleted}) {
+    final file = _riveFile;
+    final artboard = file?.defaultArtboard();
+    if (!mounted || artboard == null) {
+      return;
     }
 
-    _artboard = _rFile.mainArtboard
-      ..addController(_riveController = SimpleAnimation('light_tick'));
+    final previousPainter = _painter;
+    final previousArtboard = _artboard;
 
-    _riveController!.isActiveChanged.addListener(_riveListener);
+    setState(() {
+      _artboard = artboard;
+      _painter = _CompletionAwarePainter(
+        animationName,
+        onCompleted: onCompleted,
+      );
+    });
+
+    // Let the frame that still paints them finish first.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      previousPainter?.dispose();
+      previousArtboard?.dispose();
+    });
   }
 
   @override
@@ -134,17 +161,11 @@ class _VendorInformationState extends State<VendorInformation> {
     super.initState();
   }
 
-  void _riveListener() {
-    if (!_riveController!.isActive) {
-      // _artboard.removeController(_riveController!);
-      _onFinished();
-    }
-  }
-
   @override
   void dispose() {
-    _riveController?.isActiveChanged.removeListener(_riveListener);
-    _riveController?.dispose();
+    _painter?.dispose();
+    _artboard?.dispose();
+    _riveFile?.dispose();
     super.dispose();
   }
 
@@ -242,6 +263,8 @@ class _VendorInformationState extends State<VendorInformation> {
 
   Widget _buildLoadingWidget() {
     final size = MediaQuery.of(context).size;
+    final artboard = _artboard;
+    final painter = _painter;
     return Container(
       width: size.width,
       height: size.height,
@@ -250,11 +273,33 @@ class _VendorInformationState extends State<VendorInformation> {
         child: SizedBox(
           width: 200,
           height: 200,
-          child: Rive(
-            artboard: _artboard,
-          ),
+          child: artboard == null || painter == null
+              ? const Center(child: CircularProgressIndicator())
+              : RiveArtboardWidget(
+                  artboard: artboard,
+                  painter: painter,
+                ),
         ),
       ),
     );
+  }
+}
+
+/// rive 0.14 dropped animation controllers and their completion listeners. A
+/// non-looping animation instead reports that it has nothing left to advance.
+final class _CompletionAwarePainter extends SingleAnimationPainter {
+  _CompletionAwarePainter(super.animationName, {this.onCompleted});
+
+  final VoidCallback? onCompleted;
+  var _notified = false;
+
+  @override
+  bool advance(double elapsedSeconds) {
+    final keepGoing = super.advance(elapsedSeconds);
+    if (!keepGoing && !_notified) {
+      _notified = true;
+      onCompleted?.call();
+    }
+    return keepGoing;
   }
 }

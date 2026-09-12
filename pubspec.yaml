@@ -114,7 +114,7 @@ dependencies:
   rate_my_app:
   ### Native Payment
   responsive_builder:
-  rive: ^0.13.15
+  rive: ^0.14.11
   smooth_page_indicator:
   sticky_headers:
   # AUTHENTICATION

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
 import 'package:rive/rive.dart';
 
 class RiveSplashScreen extends StatefulWidget {
@@ -36,8 +34,9 @@ class RiveSplashScreen extends StatefulWidget {
 }
 
 class _RiveSplashScreenState extends State<RiveSplashScreen> {
+  File? _riveFile;
   Artboard? _riveArtboard;
-  RiveAnimationController? _controller;
+  SingleAnimationPainter? _painter;
 
   @override
   void initState() {
@@ -45,36 +44,66 @@ class _RiveSplashScreenState extends State<RiveSplashScreen> {
 
     WidgetsBinding.instance.endOfFrame.then((_) async {
       if (mounted) {
-        var data;
-        if (widget.imageUrl.startsWith('http')) {
-          var readBytes = await http.readBytes(Uri.parse(widget.imageUrl));
-          data = ByteData.sublistView(readBytes);
-        } else {
-          data = await rootBundle.load(widget.imageUrl);
-        }
-        final file = RiveFile.import(data);
-        final artboard = file.mainArtboard;
-        artboard
-            .addController(_controller = SimpleAnimation(widget.animationName));
-        setState(() {
-          _riveArtboard = artboard;
-        });
+        // rive resolves both sources itself now, so the bytes no longer have
+        // to be fetched here.
+        final file = widget.imageUrl.startsWith('http')
+            ? await File.url(widget.imageUrl, riveFactory: Factory.flutter)
+            : await File.asset(widget.imageUrl, riveFactory: Factory.flutter);
+        final artboard = file?.defaultArtboard();
 
-        // Fix hang issue from splash screen, need to call onSuccess without require _controller
+        if (mounted && artboard != null) {
+          setState(() {
+            _riveFile = file;
+            _riveArtboard = artboard;
+            _painter = SingleAnimationPainter(
+              widget.animationName,
+              fit: _fit(widget.boxFit),
+            );
+          });
+        } else {
+          artboard?.dispose();
+          file?.dispose();
+        }
+
+        // Fix hang issue from splash screen, need to call onSuccess without require the animation
         await Future.delayed(Duration(milliseconds: widget.duration))
             .then((value) => widget.onSuccess());
       }
     });
   }
 
+  Fit _fit(BoxFit boxFit) {
+    switch (boxFit) {
+      case BoxFit.fill:
+        return Fit.fill;
+      case BoxFit.cover:
+        return Fit.cover;
+      case BoxFit.fitWidth:
+        return Fit.fitWidth;
+      case BoxFit.fitHeight:
+        return Fit.fitHeight;
+      case BoxFit.none:
+        return Fit.none;
+      case BoxFit.scaleDown:
+        return Fit.scaleDown;
+      case BoxFit.contain:
+        return Fit.contain;
+    }
+  }
+
   @override
   void dispose() {
-    _controller?.dispose();
+    _painter?.dispose();
+    _riveArtboard?.dispose();
+    _riveFile?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final artboard = _riveArtboard;
+    final painter = _painter;
+
     return Container(
       width: MediaQuery.of(context).size.width,
       height: MediaQuery.of(context).size.height,
@@ -86,11 +115,11 @@ class _RiveSplashScreenState extends State<RiveSplashScreen> {
         right: widget.paddingRight,
       ),
       child: Center(
-        child: _riveArtboard == null
+        child: artboard == null || painter == null
             ? const SizedBox()
-            : Rive(
-                artboard: _riveArtboard!,
-                fit: widget.boxFit,
+            : RiveArtboardWidget(
+                artboard: artboard,
+                painter: painter,
               ),
       ),
     );
