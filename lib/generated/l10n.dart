@@ -9265,10 +9265,10 @@ class S {
     );
   }
 
-  /// `About Locafy`
+  /// `About Styleya`
   String get aboutLocafy {
     return Intl.message(
-      'About Locafy',
+      'About Styleya',
       name: 'aboutLocafy',
       desc: '',
       args: [],
@@ -9295,10 +9295,10 @@ class S {
     );
   }
 
-  /// `Why Sell on Locafy`
+  /// `Why Sell on Styleya`
   String get whySellOnLocafy {
     return Intl.message(
-      'Why Sell on Locafy',
+      'Why Sell on Styleya',
       name: 'whySellOnLocafy',
       desc: '',
       args: [],
@@ -9816,10 +9816,10 @@ class S {
     );
   }
 
-  /// `Welcome to Locafy Market`
+  /// `Welcome to Styleya`
   String get welcomeToLocafyMarket {
     return Intl.message(
-      'Welcome to Locafy Market',
+      'Welcome to Styleya',
       name: 'welcomeToLocafyMarket',
       desc: '',
       args: [],

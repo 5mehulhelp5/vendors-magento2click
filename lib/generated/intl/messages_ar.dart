@@ -1356,10 +1356,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "faqs": MessageLookupByLibrary.simpleMessage("الأسئلة الشائعة"),
     "deliveryReturns": MessageLookupByLibrary.simpleMessage("الشحن والاسترجاع"),
     "termsConditions": MessageLookupByLibrary.simpleMessage("الشروط والأحكام"),
-    "aboutLocafy": MessageLookupByLibrary.simpleMessage("عن لوكافاي"),
+    "aboutLocafy": MessageLookupByLibrary.simpleMessage("عن Styleya"),
     "ourSellers": MessageLookupByLibrary.simpleMessage("بائعونا"),
     "forSellers": MessageLookupByLibrary.simpleMessage("للبائعين"),
-    "whySellOnLocafy": MessageLookupByLibrary.simpleMessage("لماذا تبيع على لوكافاي"),
+    "whySellOnLocafy": MessageLookupByLibrary.simpleMessage("لماذا تبيع على Styleya"),
     "joinAsSeller": MessageLookupByLibrary.simpleMessage("انضم كبائع"),
     "quickLinks": MessageLookupByLibrary.simpleMessage("روابط سريعة"),
     "mensCollections": MessageLookupByLibrary.simpleMessage("مجموعة الرجال"),
@@ -1424,7 +1424,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "passwordNotMatch": MessageLookupByLibrary.simpleMessage(
         "كلمة المرور وتأكيد كلمة المرور غير متطابقتين"),
     "welcomeToLocafyMarket":
-        MessageLookupByLibrary.simpleMessage("مرحباً بك في متجر لوكافاي"),
+        MessageLookupByLibrary.simpleMessage("مرحباً بك في Styleya"),
     "changeLanguageTitle":
         MessageLookupByLibrary.simpleMessage("تغيير اللغة"),
     "mustLoginToWishlist": MessageLookupByLibrary.simpleMessage(

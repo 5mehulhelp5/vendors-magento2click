@@ -1,6 +1,6 @@
 # vendors-magento2click
 
-Locafy customer app (Flutter), pointed at the `https://styleya.net` Magento backend.
+Styleya customer app (Flutter), pointed at the `https://styleya.net` Magento backend.
 
 The backend is configured in one place — `serverConfig.url` in [lib/env.dart](lib/env.dart).
 Catalog media (`kMediaDomain` in `lib/common/constants/general.dart`) derives from it.

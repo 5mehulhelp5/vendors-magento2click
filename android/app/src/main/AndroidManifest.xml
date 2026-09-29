@@ -81,7 +81,7 @@
     <application
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
-        android:label="Locafy Fashion Marketplace"
+        android:label="Styleya"
         android:theme="@style/AppTheme"
         android:requestLegacyExternalStorage="true"
         android:fullBackupContent="@xml/backup_rules"

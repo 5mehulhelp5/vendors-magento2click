@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Locafy</string>
+	<string>Styleya</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -36,9 +36,9 @@
 	<key>NSCameraUsageDescription</key>
 	<string>This app needs camera access to scan QR codes</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Turning on location services allows Locafy App to show you place of transaction</string>
+	<string>Turning on location services allows Styleya to show you place of transaction</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Turning on location services allows Locafy App to show you place of transaction</string>
+	<string>Turning on location services allows Styleya to show you place of transaction</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Need to access your photo library to select a photo add and update profile picture</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

@@ -1386,10 +1386,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "faqs": MessageLookupByLibrary.simpleMessage("FAQ's"),
     "deliveryReturns": MessageLookupByLibrary.simpleMessage("Delivery & Returns"),
     "termsConditions": MessageLookupByLibrary.simpleMessage("Terms & Conditions"),
-    "aboutLocafy": MessageLookupByLibrary.simpleMessage("About Locafy"),
+    "aboutLocafy": MessageLookupByLibrary.simpleMessage("About Styleya"),
     "ourSellers": MessageLookupByLibrary.simpleMessage("Our Sellers"),
     "forSellers": MessageLookupByLibrary.simpleMessage("For Sellers"),
-    "whySellOnLocafy": MessageLookupByLibrary.simpleMessage("Why Sell on Locafy"),
+    "whySellOnLocafy": MessageLookupByLibrary.simpleMessage("Why Sell on Styleya"),
     "joinAsSeller": MessageLookupByLibrary.simpleMessage("Join us as a Seller"),
     "quickLinks": MessageLookupByLibrary.simpleMessage("Quick Links"),
     "mensCollections": MessageLookupByLibrary.simpleMessage("Men's Collections"),
@@ -1452,7 +1452,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "returnMerchandiseAuthorization": MessageLookupByLibrary.simpleMessage("Return Merchandise Authorization"),
     "signOut": MessageLookupByLibrary.simpleMessage("Sign Out"),
     "welcomeToLocafyMarket":
-        MessageLookupByLibrary.simpleMessage("Welcome to Locafy Market"),
+        MessageLookupByLibrary.simpleMessage("Welcome to Styleya"),
     "changeLanguageTitle":
         MessageLookupByLibrary.simpleMessage("Change language"),
     "mustLoginToWishlist": MessageLookupByLibrary.simpleMessage(

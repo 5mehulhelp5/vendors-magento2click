@@ -161,11 +161,11 @@ class DefaultConfig {
 
     /// If page id null
     /// Privacy Policies page Url. Accessible in the app via Settings > Privacy menu.
-    'PrivacyPoliciesPageUrl': 'https://locafy.market/ar/privacy',
+    'PrivacyPoliciesPageUrl': 'https://styleya.net/eg-en/privacy-policy-en',
 
-    'SupportPageUrl': 'https://locafy.market/ar/privacy',
+    'SupportPageUrl': 'https://styleya.net/eg-en/privacy-policy-en',
 
-    'DownloadPageUrl': 'https://locafy.market/ar/privacy',
+    'DownloadPageUrl': 'https://styleya.net/eg-en/privacy-policy-en',
 
     'SocialConnectUrl': [
       {
