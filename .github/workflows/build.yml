@@ -310,7 +310,9 @@ jobs:
             exit 0
           fi
           PP_PATH=$RUNNER_TEMP/adhoc.mobileprovision
-          printf '%s' "$IOS_ADHOC_PROFILE_BASE64" | base64 --decode -o "$PP_PATH"
+          # A secret piped in from Windows PowerShell carries a trailing CR/LF,
+          # which macOS base64 refuses to decode.
+          printf '%s' "$IOS_ADHOC_PROFILE_BASE64" | tr -d '\r\n ' | base64 --decode -o "$PP_PATH"
           security cms -D -i "$PP_PATH" > "$RUNNER_TEMP/adhoc.plist"
           UUID=$(plutil -extract UUID raw "$RUNNER_TEMP/adhoc.plist")
           PROFILE_NAME=$(plutil -extract Name raw "$RUNNER_TEMP/adhoc.plist")
