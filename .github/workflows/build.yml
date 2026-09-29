@@ -293,6 +293,82 @@ jobs:
             echo "  https://appstoreconnect.apple.com/apps/6811112359/testflight/ios"
           } >> "$GITHUB_STEP_SUMMARY"
 
+      # Loadly can only install Ad Hoc builds (devices listed in the profile), not
+      # the App Store-signed IPA above. Re-export the same archive with the Ad Hoc
+      # profile, so Loadly and TestFlight get the identical build. The profile must
+      # include the distribution certificate in IOS_DIST_CERT_P12_BASE64. Loadly is
+      # a convenience copy, so a failure here never fails the release.
+      - name: Upload Ad Hoc IPA to Loadly
+        if: env.IOS_SIGNING_READY == 'true'
+        continue-on-error: true
+        env:
+          IOS_ADHOC_PROFILE_BASE64: ${{ secrets.IOS_ADHOC_PROFILE_BASE64 }}
+          LOADLY_API_KEY: ${{ secrets.LOADLY_API_KEY }}
+        run: |
+          if [ -z "$IOS_ADHOC_PROFILE_BASE64" ] || [ -z "$LOADLY_API_KEY" ]; then
+            echo "::warning::IOS_ADHOC_PROFILE_BASE64 or LOADLY_API_KEY not set — skipping the iOS Loadly upload."
+            exit 0
+          fi
+          PP_PATH=$RUNNER_TEMP/adhoc.mobileprovision
+          printf '%s' "$IOS_ADHOC_PROFILE_BASE64" | base64 --decode -o "$PP_PATH"
+          security cms -D -i "$PP_PATH" > "$RUNNER_TEMP/adhoc.plist"
+          UUID=$(plutil -extract UUID raw "$RUNNER_TEMP/adhoc.plist")
+          PROFILE_NAME=$(plutil -extract Name raw "$RUNNER_TEMP/adhoc.plist")
+          for DIR in "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles" \
+                     "$HOME/Library/MobileDevice/Provisioning Profiles"; do
+            mkdir -p "$DIR"
+            cp "$PP_PATH" "$DIR/$UUID.mobileprovision"
+          done
+
+          cat > "$RUNNER_TEMP/ExportOptions-adhoc.plist" <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>release-testing</string>
+              <key>teamID</key>
+              <string>544Y9RU66L</string>
+              <key>signingStyle</key>
+              <string>manual</string>
+              <key>signingCertificate</key>
+              <string>iPhone Distribution</string>
+              <key>provisioningProfiles</key>
+              <dict>
+                  <key>app.locafy.customer</key>
+                  <string>$PROFILE_NAME</string>
+              </dict>
+          </dict>
+          </plist>
+          EOF
+
+          xcodebuild -exportArchive \
+            -archivePath build/ios/archive/Runner.xcarchive \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions-adhoc.plist" \
+            -exportPath build/ios/adhoc
+          IPA=$(ls build/ios/adhoc/*.ipa | head -1)
+
+          DESC="iOS build ${{ github.run_number }} — ${{ github.ref_name }}@${GITHUB_SHA:0:7}"
+          RESPONSE=$(curl -sS -X POST https://api.loadly.io/apiv2/app/upload \
+            -F "_api_key=$LOADLY_API_KEY" \
+            -F "buildInstallType=1" \
+            -F "buildUpdateDescription=$DESC" \
+            -F "file=@$IPA")
+          echo "Loadly response: $RESPONSE"
+          CODE=$(echo "$RESPONSE" | jq -r '.code // empty')
+          if [ "$CODE" != "0" ]; then
+            echo "::error::Loadly iOS upload failed (code=$CODE): $(echo "$RESPONSE" | jq -r '.message // .')"
+            exit 1
+          fi
+          SHORTCUT=$(echo "$RESPONSE" | jq -r '.data.buildShortcutUrl // empty')
+          QRCODE=$(echo "$RESPONSE" | jq -r '.data.buildQRCodeURL // empty')
+          {
+            echo "### 🍏 iOS (Ad Hoc) uploaded to Loadly"
+            [ -n "$SHORTCUT" ] && echo "- Install: https://loadly.io/$SHORTCUT"
+            [ -n "$QRCODE" ] && echo "- ![QR]($QRCODE)"
+            echo "- Installs only on devices registered in the Ad Hoc profile \"$PROFILE_NAME\"."
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Clean up signing material
         if: ${{ always() }}
         run: |
