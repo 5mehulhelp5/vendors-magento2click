@@ -142,9 +142,10 @@ flutter_icons:
   image_path_android: "assets/images/app-icon-square.png"
   image_path_ios: "assets/images/app-icon-square.png"
   android: true # can specify file name here e.g. "ic_launcher"
-  ios: false # keep the existing (approved) iOS icon as reference — only regenerate Android
+  ios: true
+  remove_alpha_ios: true
   # Solid background + a padded foreground so the Android adaptive mask does not
-  # clip the wordmark (previously both layers were the full-bleed logo → cropped).
+  # clip the mark (previously both layers were the full-bleed logo → cropped).
   adaptive_icon_background: "#FFFFFF" # only available for Android 8.0 devices and above
   adaptive_icon_foreground: "assets/images/app-icon-foreground.png" # only available for Android 8.0 devices and above
 

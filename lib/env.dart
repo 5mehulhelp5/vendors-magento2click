@@ -7,10 +7,10 @@ Map<String, dynamic> environment = {
   /// ➡️ lib/common/config.dart
   "serverConfig": {
     "type": "magento",
-    // Base URL for this build: the vendors.magento2.click Magento backend.
+    // Base URL for this build: the styleya.net Magento backend.
     // No trailing slash - MagentoHelper builds "$domain/eg-en/rest/V1/..." by
     // string concatenation, so a trailing slash yields a double slash.
-    "url": "https://vendors.magento2.click",
+    "url": "https://styleya.net",
     "accessToken": "jd7u3bu9g7ca1vgocv0dvpr77xof57jf",
     'blog': "https://mstore.io",
     //"https://magentoegypt.com/blog/ar/",
@@ -60,7 +60,7 @@ Map<String, dynamic> environment = {
     /// ImageTools.formatImage request a -small/-medium/-large sibling, which
     /// 404s to a grey placeholder if the backend never ran the Re-generate
     /// Images plugin; OFF requests the original, which always exists. So OFF
-    /// is the fail-safe default until vendors.magento2.click is checked, and
+    /// is the fail-safe default until styleya.net is checked, and
     /// the sibling locafy.magento2.click backend is known to have no variants.
     ///
     /// To confirm and flip this on: take any product image URL under /media/
@@ -162,7 +162,7 @@ Map<String, dynamic> environment = {
 
     /// If page id null
     /// Privacy Policies page Url. Accessible in the app via Settings > Privacy menu.
-    "PrivacyPoliciesPageUrl": "https://vendors.magento2.click/eg-en/privacy-policy-en",
+    "PrivacyPoliciesPageUrl": "https://styleya.net/eg-en/privacy-policy-en",
 
     "SupportPageUrl": "https://support.inspireui.com/",
 

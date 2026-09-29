@@ -21,7 +21,7 @@ final bool isDesktop = UniversalPlatform.isMacOS || UniversalPlatform.isWindows;
 /// catalog media 404'd. Deriving from the server URL avoids that class of bug.
 String get kMediaDomain {
   final url = serverConfig['url'];
-  return (url is String && url.isNotEmpty) ? url : 'https://vendors.magento2.click';
+  return (url is String && url.isNotEmpty) ? url : 'https://styleya.net';
 }
 
 /// constant for Magento payment
