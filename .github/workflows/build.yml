@@ -77,11 +77,16 @@ jobs:
       - name: Build APK
         run: flutter build apk --release --build-number=$ANDROID_VERSION_CODE
 
+      # Artifacts are convenience copies only; the store uploads below read the
+      # files from the runner. Keep them briefly so the storage quota never fills,
+      # and never let a failed copy stop the release.
       - name: Upload Android Artifact
         uses: actions/upload-artifact@v4
+        continue-on-error: true
         with:
           name: app-release.apk
           path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 3
 
       - name: Upload APK to Loadly
         env:
@@ -119,9 +124,11 @@ jobs:
 
       - name: Upload Android App Bundle
         uses: actions/upload-artifact@v4
+        continue-on-error: true
         with:
           name: app-release.aab
           path: build/app/outputs/bundle/release/app-release.aab
+          retention-days: 3
 
       # Publishing needs both halves: a bundle signed with the real upload key,
       # and Play API credentials. Neither is needed to build, so the publish step
@@ -262,9 +269,11 @@ jobs:
       - name: Upload IPA Artifact
         if: env.IOS_SIGNING_READY == 'true'
         uses: actions/upload-artifact@v4
+        continue-on-error: true
         with:
           name: locafy-customer.ipa
           path: build/ios/ipa/locafy-customer.ipa
+          retention-days: 3
 
       - name: Upload to TestFlight
         if: env.IOS_SIGNING_READY == 'true' && env.TESTFLIGHT_READY == 'true'
